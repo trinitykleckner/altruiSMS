@@ -14,7 +14,7 @@ def bot():
     msg = resp.message()
     responded = False
     d = {'all':[], 'food':[], 'diapers':[], 'coat':[], 'blanket':[]}
-
+    
     #adding and removing phone numbers to the texing lists
     if incoming_num not in d['all']:
         d['all'].append(incoming_num) #def a better way to do this
@@ -63,6 +63,7 @@ def bot():
         msg.body("Hm, I'm not sure what you mean")
     return str(resp)
     """
+    
 
 if __name__ == '__main__':
     app.run()
