@@ -28,6 +28,8 @@ def bot():
             d[key].remove(incoming_num)
         elif (key in incoming_msg) and (incoming_num not in d[key]):
             d[key].append(incoming_num)
+
+    #if input is an intersection
     if location in incoming_msg:
         print(0)
         #NEED TO DO
@@ -38,8 +40,11 @@ def bot():
         of the item. (example: “remove diapers”)')
         responded = True
 
+    if not responded:
+        msg.body("Hm, I'm not sure what you mean")
+    return str(resp)
 
-
+    """
     if 'quote' in incoming_msg:
         # return a quote
         r = requests.get('https://api.quotable.io/random')
@@ -57,7 +62,7 @@ def bot():
     if not responded:
         msg.body("Hm, I'm not sure what you mean")
     return str(resp)
-
+    """
 
 if __name__ == '__main__':
     app.run()
