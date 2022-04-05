@@ -15,12 +15,29 @@ def bot():
     responded = False
     d = {'all':[], 'food':[], 'diapers':[], 'coat':[], 'blanket':[]}
 
-    #adding phone numbers to the texing lists
+    #adding and removing phone numbers to the texing lists
     if incoming_num not in d['all']:
         d['all'].append(incoming_num) #def a better way to do this
+        msg.body('Thanks! Just so we know where is local to you, respond to this \
+        message with the word "location" followed by the name of two streets that \
+        intersect near you')
+        responded = True
     for key in d:
-        if (key in incoming_msg) and (incoming_num not in d[key]):
+        rem = "remove "+key
+        if (rem in incoming_msg) and (incoming_num in d[key]):
+            d[key].remove(incoming_num)
+        elif (key in incoming_msg) and (incoming_num not in d[key]):
             d[key].append(incoming_num)
+    if location in incoming_msg:
+        print(0)
+        #NEED TO DO
+        msg.body('Great!! You’ll get a text when the items you selected are being \
+        distributed near you. If you ever want to add an item to be notified about,\
+        just send a text with the name of that item. If you ever want to no longer\
+        be notified for an item just send a text saying “remove” followed by the name \
+        of the item. (example: “remove diapers”)')
+        responded = True
+
 
 
     if 'quote' in incoming_msg:
