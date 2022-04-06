@@ -24,8 +24,9 @@ import requests
 def sms(request):
     output = request.body.decode("utf-8")
     payload = dict([x.split('=') for x in output.split('&')])
-    food = payload.get('Body', '').lower()
-    to_number = payload.get('From')
+    food = payload.get('Body', '').lower()[:-1]
+    to_number = "+" + payload.get('From')[3:]
+
     url = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + food
 
     response = requests.request("GET", url).json()
@@ -56,4 +57,4 @@ def sms(request):
         )
 
     print(message.sid)
-    return message.sid
+    return HttpResponse('')
