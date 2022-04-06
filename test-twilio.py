@@ -14,6 +14,8 @@ def sms():
 
     response = requests.request("GET", url).json()
 
+    #CREATE A PERSON OBJECT
+
     r = ""
     #adding to and removing from the data base
     items = ["food", "diaper", "blanket", "sanitary"]
@@ -31,6 +33,12 @@ def sms():
             elif (item in incoming):
                 add_num(to_number, item)
                 r += "Sounds good! To make sure we are notifying you about distributions of "+item+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
+
+        if "shelter" in incoming:
+            if person.location == None:
+                r = 'To find a shelter for you I need some idea of your location, send a message saying "shelter" followed by either "zip" and a zip code, or "intersection" and the name of two streets that intersect near you'
+
+        #adding location data
         if "zip" in incoming:
             #set person.location to int(item[5:])
             pass
