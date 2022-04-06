@@ -21,6 +21,8 @@ def sms():
         add_num(to_number)
         r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
     else:
+        if item == "help":
+            r = help_menu()
         for item in items:
             rem = "remove "+item
             if (rem in incoming):
@@ -77,5 +79,13 @@ def new(num, which="master"):
 #returns true if found intersection
 def intersect_valid(road1, road2):
     return True
+
+def help_menu():
+    s = "-To change what items you are notified about you can just ask me to “remove” or “add” followed by an item name\n"
+    s += '-To get a list of items that I can notify you about, you can just text "items"\n'
+    s += '-To change your location, text “change location to” followed by the new zip code or intersection (names of two streets)\n'
+    s += '-To find the nearest shelter to you, text “shelter” followed by a zip code or intersection you are looking for a shelter near. If you have already given us a location, you can just text “shelter”\n'
+    return s
+
 if __name__ == "__main__":
     app.run(debug=True)
