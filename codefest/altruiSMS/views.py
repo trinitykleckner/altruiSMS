@@ -48,6 +48,7 @@ def sms(request):
             incoming += ' '
 
     r = ""
+    road_words = ['rd','road','st','street','ave','avenue','wy','way','cir','circle','ct','court','expy','expressway','fwy','freeway','ln','lane','pky','parkway','square','sq','tpk','turnpike']
     #adding to and removing from the data base
     items = ["food", "diaper", "blanket", "sanitary"]
     removed = []
@@ -107,21 +108,25 @@ def sms(request):
             #set person.location to int(item[5:])
             pass
         elif "intersection" in incoming:
-            if len(incoming.split()) == 3:
-                road1, road2 = incoming.split()[1], incoming.split()[2]
-
-            elif len(incoming.split()) == 5:
-                road1 = incoming.split()[1].append(" "+incoming.split()[2])
-                road2 = incoming.split()[3].append(" "+incoming.split()[4])
-            if intersect_valid(road1, road2):
-                #set person location
-                r += "Thanks!! You will now be notified when there is a distribution near you."
+            split = incoming.split()[1:]
+            for word in split:
+                if word in road_words:
+                    road1 = ' '.join(split[:split.index(word) + 1])
+                    road2 = ' '.join(split[split.index(word) + 1:])
+                    set_location(person, road1, road2)
+                    r += "Coords: ["+str(person.latitude)+','+str(person.longitude)+']'
+                    found = True
+                    break
+            if found:
+                #r += "Thanks!! You will now be notified when there is a distribution near you."
+                pass
             else:
                 r += 'Hm, I could not find that intersection, could you try entering another one (make sure to include the word "intersection" before the street names)'
 
         if r == "":
             r = "I'm sorry, I'm not sure what that means, for a full list of things I can do text \"help me\""
 
+    person.save()
     client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
 
     message = client.messages \
@@ -213,6 +218,20 @@ def list_to_string(lst):
                 s += ", "+lst[0]
                 lst = lst[1:]
     return s
+
+
+def set_location(person, road1, road2):
+    req = requests.get('https://www.google.com/maps/place/'+road1+' & '+road2)
+    coords = re.search(r'\[null,null,[+-]?([0-9]+\.[0-9]{10,}),[+-]?([0-9]+\.[0-9]+|\.[0-9]+)]', req.text) #[0].split(',')
+    if coords is not None:
+        person.latitude = float(coords[0].split(',')[2])
+        person.longitude = float(coords[0].split(',')[3][:-1])
+        person.save()
+        return True
+    else:
+        return False
+
+
 
 
 def help_menu():

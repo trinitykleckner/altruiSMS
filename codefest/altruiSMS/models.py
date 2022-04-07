@@ -11,19 +11,13 @@ class Beneficiary(models.Model):
     diapers = models.BooleanField(default=False)
     sanitary = models.BooleanField(default=False)
     blankets = models.BooleanField(default=False)
+    longitude = models.FloatField(null=True, default=0.0)
+    latitude = models.FloatField(null=True, default=0.0)
 
     def __str__(self):
         return str(self.phone_num)
 
-class Location(models.Model):
-    longitude = models.FloatField()
-    laditude = models.FloatField()
 
-    def Location(self, road1, road2):
-        coords = requests.get('https://www.google.com/maps/place/'+road1+' & '+road2)
-        coords.findall(r'll=(.*?)" item', coords.text)[0].split(',')
-        self.laditude = coords[0]
-        self.laditude = coords[1]
 
 class Organization(models.Model):
     organization_name = models.CharField(max_length=100)

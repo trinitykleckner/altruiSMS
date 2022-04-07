@@ -33,10 +33,6 @@ class Migration(migrations.Migration):
                 ('zipcode', models.CharField(max_length=5)),
             ],
         ),
-        migrations.RemoveField(
-            model_name='beneficiary',
-            name='name',
-        ),
         migrations.AddField(
             model_name='beneficiary',
             name='blankets',
