@@ -33,6 +33,8 @@ class Organization(models.Model):
     diapers = models.BooleanField(default=False)
     sanitary = models.BooleanField(default=False)
     blankets = models.BooleanField(default=False)
+    stayable = models.BooleanField(default=False)
+
     def __str__(self):
         return str(self.organization_name)
 

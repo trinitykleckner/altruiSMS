@@ -101,7 +101,7 @@ def sms(request):
             if person.longitude == person.latitude == 0.0:
                 r = 'To find a shelter for you I need some idea of your location first. Send a message saying "intersection" and the name of two streets that intersect near you. After doing this, text shelter again, and I can find the one closest to you'
             else:
-                pass
+                find_shelter(person.latitude,person.longitude)
 
         elif "intersection" in incoming:
             split = incoming.split()[1:]
@@ -227,7 +227,22 @@ def set_location(person, road1, road2):
     else:
         return False
 
+def address_to_ll(shelter):
+    pass
 
+def find_shelter(lat, lon):
+    all_stayable = Organization.objects.all(stayable=True)
+    closest = None
+    shortest_distance = None
+    for shelter in all_stayable:
+        if closest == None:
+            closest = shelter
+            coords = address_to_ll(shelter)
+            dist = get_distance(coords[0],coords[1], lat, lon)
+
+def get_distance(lat1, lon1, lat2, lon2):
+    lat, lon = abs(lat1 - lon1), abs(lon1 - lon2)
+    return pow((pow(lat, 2) + pow(lon, 2)),.5)
 
 
 def help_menu():
