@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.response import Response
@@ -17,6 +17,10 @@ import calendar
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 import requests
+from django.views import View
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 @api_view(["GET", "POST"])
 @csrf_exempt
@@ -120,6 +124,33 @@ def sms(request):
     print(message.sid)
     return HttpResponse('')
 
+
+class Index(LoginRequiredMixin, View):
+    template = 'index.html'
+    login_url = '/login/'
+
+    def get(self, request):
+        return render(request, self.template, {'username':self.request.user})
+
+class Login(View):
+    template = 'login.html'
+
+    def get(self, request):
+        form = AuthenticationForm()
+        return render(request, self.template, {'form': form})
+
+
+    def post(self, request):
+        form = AuthenticationForm(request.POST)
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        print(user)
+        if user is not None:
+            login(request, user)
+            return HttpResponseRedirect('/')
+        else:
+            return render(request, self.template, {'form': form})
 
 #returns true if num not in which phone list
 def new(num, which="master"):
