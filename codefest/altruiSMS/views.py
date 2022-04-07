@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 import json
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Beneficiary
+from .models import Beneficiary, Organization
 import re 
 from django.forms.models import model_to_dict
 from django.db.models import CharField
@@ -141,6 +141,32 @@ class Index(LoginRequiredMixin, View):
 
     def get(self, request):
         return render(request, self.template, {'username':self.request.user})
+
+class Register(View):
+    template = 'register.html'
+
+    def get(self, request):
+        return render(request, self.template)
+    
+    def post(self, request):
+        organization = Organization(organization_name=request.POST['organization_name'], first_name=request.POST['first_name'] \
+            , last_name=request.POST['last_name'], email=request.POST['email'], password=request.POST['password'], \
+                address_one=request.POST['address_one'], address_two=request.POST['address_two']\
+                    , city=request.POST['city'], zipcode=request.POST['zipcode'], food=self.change_on_to_true(request.POST.get('food', False)), \
+                        diapers=self.change_on_to_true(request.POST.get('diapers', False)), \
+                            sanitary=self.change_on_to_true(request.POST.get('sanitary', False))\
+                                , blankets=self.change_on_to_true(request.POST.get('blankets', False)))
+        organization.save()
+        return HttpResponseRedirect('/login')
+    
+    def change_on_to_true(self, data):
+        if data == "on":
+            return True
+        else:
+            return False
+
+
+
 
 class Login(View):
     template = 'login.html'
