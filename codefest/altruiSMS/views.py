@@ -98,15 +98,11 @@ def sms(request):
 
 
         if "shelter" in incoming:
-            if person.location == None:
-                r = 'To find a shelter for you I need some idea of your location first. Send a message saying "zip" followed by the zip code you are in, or "intersection" and the name of two streets that intersect near you. After doing this, text shelter again, and I can find the one closest to you'
+            if person.longitude == person.latitude == 0.0:
+                r = 'To find a shelter for you I need some idea of your location first. Send a message saying "intersection" and the name of two streets that intersect near you. After doing this, text shelter again, and I can find the one closest to you'
             else:
                 pass
 
-        #adding location data
-        if "zip" in incoming:
-            #set person.location to int(item[5:])
-            pass
         elif "intersection" in incoming:
             split = incoming.split()[1:]
             for word in split:
