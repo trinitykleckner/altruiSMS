@@ -96,12 +96,18 @@ def sms(request):
             s = list_to_string(removed)
             r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
+        if "address" in incoming:
+            print("here")
+            coords = (address_to_ll("12417 Borges Ave","MD"))
+            r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
 
         if "shelter" in incoming:
             if person.longitude == person.latitude == 0.0:
                 r = 'To find a shelter for you I need some idea of your location first. Send a message saying "intersection" and the name of two streets that intersect near you. After doing this, text shelter again, and I can find the one closest to you'
             else:
-                find_shelter(person.latitude,person.longitude)
+                closest = find_shelter(person.latitude,person.longitude)
+                address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.state+' '+closest.zipcode
+                r += 'The shelter closest to you is '+closest.organization_name+'Here is the adress:'+address+'\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
 
         elif "intersection" in incoming:
             split = incoming.split()[1:]
@@ -228,7 +234,12 @@ def set_location(person, road1, road2):
         return False
 
 def address_to_ll(shelter):
-    pass
+    req = requests.get('https://www.google.com/maps/place/' + shelter.address_one + ' '+ shelter.state)
+    coords = re.search(r'\[null,null,[+-]?([0-9]+\.[0-9]{10,}),[+-]?([0-9]+\.[0-9]+|\.[0-9]+)]',req.text)
+    if coords is not None:
+        return [float(coords[0].split(',')[2]),float(coords[0].split(',')[3][:-1])]
+    else:
+        return False
 
 def find_shelter(lat, lon):
     all_stayable = Organization.objects.all(stayable=True)
@@ -238,7 +249,17 @@ def find_shelter(lat, lon):
         if closest == None:
             closest = shelter
             coords = address_to_ll(shelter)
+            if coords == False:
+                return False
             dist = get_distance(coords[0],coords[1], lat, lon)
+            shortest_distance = dist
+        else:
+            coords = address_to_ll(shelter)
+            dist = get_distance(coords[0],coords[1], lat, lon)
+            if dist < shortest_distance:
+                closest = shelter
+                shortest_distance = dist
+    return closest
 
 def get_distance(lat1, lon1, lat2, lon2):
     lat, lon = abs(lat1 - lon1), abs(lon1 - lon2)
