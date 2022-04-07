@@ -28,10 +28,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 def sms(request):
     output = request.body.decode("utf-8")
     payload = dict([x.split('=') for x in output.split('&')])
-    incoming = payload.get('Body', '').lower()[:-1]
+    incoming_og = payload.get('Body', '').lower()
     to_number = "+" + payload.get('From')[3:]
 
-    url = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + incoming
+    url = "https://www.themealdb.com/api/json/v1/1/search.php?s=" + incoming_og
 
     response = requests.request("GET", url).json()
 
@@ -39,39 +39,47 @@ def sms(request):
     person = Beneficiary(phone_num = to_number)
     person.save()
 
+    #converting incoming to no special chars
+    incoming = ''
+    for c in incoming_og:
+        if c.isalpha():
+            incoming += c
+        elif c == "+":
+            incoming += ' '
 
     r = ""
     #adding to and removing from the data base
     items = ["food", "diaper", "blanket", "sanitary"]
     removed = []
     added = []
+    print(incoming)
     if new(to_number):
         r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
     else:
-        if incoming == "help":
+        if "help me" in incoming:
             r = help_menu()
-        if "food" in items:
+        if "food" in incoming:
             if "remove food" in items:
                 removed.append("food")
                 person.food = False
             else:
                 added.append("food")
                 person.food = True
-        if "diaper" in items:
+        if "diaper" in incoming:
             if "remove diaper" in items:
                 removed.append("diapers")
                 person.diapers = False
             else:
                 added.append("diapers")
                 person.diapers = True
-        if "blanket" in items:
+        if "blanket" in incoming:
             if "remove blanket" in items:
                 removed.append("blankets")
                 person.blankets = False
             else:
                 added.append("blankets")
                 person.blankets = True
-        if "sanitary" in items:
+        if "sanitary" in incoming:
             if "remove sanitary" in items:
                 removed.append("sanitary items")
                 person.sanitary = False
@@ -80,10 +88,12 @@ def sms(request):
                 person.sanitary = True
 
         if len(added) > 0:
-            r += "Sounds good! To make sure we are notifying you about distributions of "+list_to_string(added)+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
+            s = list_to_string(added)
+            r += "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
 
         if len(removed) > 0:
-            r += "Sounds good, I will no longer notify you about avalible " + list_to_string(removed) + "\n"
+            s = list_to_string(removed)
+            r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
 
         if "shelter" in incoming:
@@ -110,7 +120,7 @@ def sms(request):
                 r += 'Hm, I could not find that intersection, could you try entering another one (make sure to include the word "intersection" before the street names)'
 
         if r == "":
-            r = "I'm sorry, I'm not sure what that means, for a full list of things I can do text \"help\""
+            r = "I'm sorry, I'm not sure what that means, for a full list of things I can do text \"help me\""
 
     client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
 
@@ -176,6 +186,7 @@ def list_to_string(lst):
             else:
                 s += ", "+lst[0]
                 lst = lst[1:]
+    return s
 
 
 def help_menu():
