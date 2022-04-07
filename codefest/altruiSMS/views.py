@@ -21,6 +21,7 @@ from django.views import View
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 
 @api_view(["GET", "POST"])
 @csrf_exempt
@@ -162,8 +163,11 @@ class Register(View):
                     , city=request.POST['city'], zipcode=request.POST['zipcode'], food=self.change_on_to_true(request.POST.get('food', False)), \
                         diapers=self.change_on_to_true(request.POST.get('diapers', False)), \
                             sanitary=self.change_on_to_true(request.POST.get('sanitary', False))\
-                                , blankets=self.change_on_to_true(request.POST.get('blankets', False)))
+                                , blankets=self.change_on_to_true(request.POST.get('blankets', False))\
+                                    , stayable=self.change_on_to_true(request.POST.get('stayable')))
         organization.save()
+        user = User.objects.create_user(username=request.POST['organization_name'], email=request.POST['email'], password=request.POST['password'], is_staff=False)
+        user.save()
         return HttpResponseRedirect('/login')
     
     def change_on_to_true(self, data):
