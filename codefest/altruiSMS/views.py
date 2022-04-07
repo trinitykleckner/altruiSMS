@@ -19,7 +19,7 @@ from twilio.rest import Client
 import requests
 from django.views import View
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 
@@ -150,6 +150,14 @@ class Index(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, self.template, {'username':self.request.user})
 
+class CreateEvent(LoginRequiredMixin, View):
+    template = 'create_event.html'
+    login_url = '/login/'
+
+    def get(self, request):
+        return render(request, self.template, {'username':self.request.user})
+
+
 class Register(View):
     template = 'register.html'
 
@@ -176,8 +184,12 @@ class Register(View):
         else:
             return False
 
+class Logout(View):
+    template = "login.html"
 
-
+    def get(self, request):
+        logout(request)
+        return render(request, self.template)
 
 class Login(View):
     template = 'login.html'

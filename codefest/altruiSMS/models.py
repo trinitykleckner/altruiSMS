@@ -1,7 +1,9 @@
+from email.policy import default
 from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.forms import CharField
 import requests
+from datetime import datetime
 
 # Create your models here.
 class Beneficiary(models.Model):
@@ -40,12 +42,12 @@ class Organization(models.Model):
 
 class Event(models.Model):
     organization_name = models.CharField(max_length=100)
+    organizer_firstname = models.CharField(max_length=100, null=True)
+    organizer_lastname = models.CharField(max_length=100, null=True)
     event_name = models.CharField(max_length=100)
     event_description = models.EmailField()
-    start_date = models.DateField()
-    end_date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_datetime = models.DateTimeField(default=datetime.now, blank=True)
+    end_datetime = models.DateTimeField(default=datetime.now, blank=True)
     address_one = models.CharField(max_length=100)
     address_two = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
