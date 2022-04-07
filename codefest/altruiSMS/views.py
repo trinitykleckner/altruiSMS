@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 import json
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Beneficiary, Organization
+from .models import Beneficiary, Organization, Event
 import re 
 from django.forms.models import model_to_dict
 from django.db.models import CharField
@@ -155,8 +155,21 @@ class CreateEvent(LoginRequiredMixin, View):
     login_url = '/login/'
 
     def get(self, request):
-        return render(request, self.template, {'username':self.request.user})
+        placeholder_datetime = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M")
+        return render(request, self.template, {'username':self.request.user, 'placeholder_datetime': placeholder_datetime})
 
+    def post(self, request):
+        event = Event(organization_name=self.request.user, organizer_firstname=request.POST['first_name'] \
+            , event_name=request.POST['event_name'], event_description=request.POST['event_description']
+            , organizer_lastname=request.POST['last_name'], email=request.POST['email'],  \
+                address_one=request.POST['address_one'], address_two=request.POST['address_two']\
+                    , city=request.POST['city'], zipcode=request.POST['zipcode'], food=change_on_to_true(request.POST.get('food', False)), \
+                        diapers=change_on_to_true(request.POST.get('diapers', False)), \
+                            sanitary=change_on_to_true(request.POST.get('sanitary', False))\
+                                , blankets=change_on_to_true(request.POST.get('blankets', False))\
+                                    )
+        event.save()        
+        return HttpResponseRedirect('/')
 
 class Register(View):
     template = 'register.html'
@@ -168,21 +181,17 @@ class Register(View):
         organization = Organization(organization_name=request.POST['organization_name'], first_name=request.POST['first_name'] \
             , last_name=request.POST['last_name'], email=request.POST['email'], password=request.POST['password'], \
                 address_one=request.POST['address_one'], address_two=request.POST['address_two']\
-                    , city=request.POST['city'], zipcode=request.POST['zipcode'], food=self.change_on_to_true(request.POST.get('food', False)), \
-                        diapers=self.change_on_to_true(request.POST.get('diapers', False)), \
-                            sanitary=self.change_on_to_true(request.POST.get('sanitary', False))\
-                                , blankets=self.change_on_to_true(request.POST.get('blankets', False))\
-                                    , stayable=self.change_on_to_true(request.POST.get('stayable')))
+                    , city=request.POST['city'], zipcode=request.POST['zipcode'], food=change_on_to_true(request.POST.get('food', False)), \
+                        diapers=change_on_to_true(request.POST.get('diapers', False)), \
+                            sanitary=change_on_to_true(request.POST.get('sanitary', False))\
+                                , blankets=change_on_to_true(request.POST.get('blankets', False))\
+                                    , stayable=change_on_to_true(request.POST.get('stayable')))
         organization.save()
         user = User.objects.create_user(username=request.POST['organization_name'], email=request.POST['email'], password=request.POST['password'], is_staff=False)
         user.save()
         return HttpResponseRedirect('/login')
     
-    def change_on_to_true(self, data):
-        if data == "on":
-            return True
-        else:
-            return False
+    
 
 class Logout(View):
     template = "login.html"
@@ -288,3 +297,9 @@ def help_menu():
     s += '-To change your location, text “change location to” followed by the new zip code or intersection (names of two streets)\n'
     s += '-To find the nearest shelter to you, text “shelter” followed by a zip code or intersection you are looking for a shelter near. If you have already given us a location, you can just text “shelter”\n'
     return s
+
+def change_on_to_true(data):
+        if data == "on":
+            return True
+        else:
+            return False

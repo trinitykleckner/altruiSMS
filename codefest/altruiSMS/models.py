@@ -44,6 +44,7 @@ class Event(models.Model):
     organization_name = models.CharField(max_length=100)
     organizer_firstname = models.CharField(max_length=100, null=True)
     organizer_lastname = models.CharField(max_length=100, null=True)
+    email=models.EmailField(null=True)
     event_name = models.CharField(max_length=100)
     event_description = models.EmailField()
     start_datetime = models.DateTimeField(default=datetime.now, blank=True)
