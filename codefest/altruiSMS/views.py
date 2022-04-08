@@ -105,9 +105,11 @@ def sms(request):
         #     coords = (address_to_ll("12417 Borges Ave","MD"))
         #     r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
 
-        # if "directions" in incoming:
-        #     get_directions("39.06057903899161","-77.00576469137488","40.00890629403572","-75.29311694445455")
-        #     r += "got them"
+        if "directions" in incoming:
+            if "walking" in incoming:
+                r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455", mode="walking")
+            else:
+                r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455")
 
         if "shelter" in incoming:
             if person.longitude == person.latitude == 0.0:
@@ -303,9 +305,9 @@ def get_distance(lat1, lon1, lat2, lon2):
     return pow((pow(lat, 2) + pow(lon, 2)),.5)
 
 #using mapbox directions API
-def get_directions(slat, slon, dlat, dlon):
+def get_directions(slat, slon, dlat, dlon, mode="driving"):
     mapbox_key = "&access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
-    base = "https://api.mapbox.com/directions/v5/mapbox/walking/"+slon+','+slat+';'+dlon+','+dlat+'?'
+    base = "https://api.mapbox.com/directions/v5/mapbox/"+mode+"/"+slon+','+slat+';'+dlon+','+dlat+'?'
     additions = "steps=true"
     payload, headers = {}, {}
     req = requests.request("GET",base+additions+mapbox_key,headers=headers, data=payload)
@@ -321,7 +323,8 @@ def help_menu():
     s = "-To change what items you are notified about you can just ask me to “remove” or “add” followed by an item name\n"
     s += '-To get a list of items that I can notify you about, you can just text "items"\n'
     s += '-To change your location, text “change location to” followed by the new zip code or intersection (names of two streets)\n'
-    s += '-To find the nearest shelter to you, text “shelter” followed by a zip code or intersection you are looking for a shelter near. If you have already given us a location, you can just text “shelter”\n'
+    s += '-To find the nearest shelter to you, text “shelter” followed by a intersection you are looking for a shelter near. If you have already given us a location, you can just text “shelter”\n'
+    s += '-To get directions to your nearest shelter type text "directions to shelter" you can get walking directions by adding "walking"'
     return s
 
 def change_on_to_true(data):
