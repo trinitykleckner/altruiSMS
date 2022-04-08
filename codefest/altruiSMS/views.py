@@ -54,7 +54,7 @@ def sms(request):
     added = []
     print(incoming)
     if new(to_number):
-        r = "1Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (for a different language type \"language\")" #(para mensajes en espanol, texto \"espanol\")"
+        r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (para mensajes en espanol, texto \"espanol\")" #(for a different language type \"language\")"
         person = Beneficiary.objects.create(phone_num=to_number)
         person.save()
     else:
@@ -64,24 +64,24 @@ def sms(request):
         if "help me" in incoming:
             r = help_menu()
         if "hi" == incoming or "hey" == incoming or "hello" == incoming:
-            r = "2Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
         if "items" in incoming:
             r += "Here are the items you can opt into (you can do so by replying with the names of the items you would like to be notified about):\n"+items[0]
             for item in items[1:]:
                 r += ", "+item
-        if "language" in incoming:
-            r += "what language? english, spanish, french, chinese, arabic, russian, german, italian, japanese, or korean"
-        for lang in lang_dict.keys():
-            if lang in incoming and lang != "english":
-                person.language = lang_dict[lang]
-                r = "3Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        # if "language" in incoming:
+        #     r += "what language? english, spanish, french, chinese, arabic, russian, german, italian, japanese, or korean"
+        # for lang in lang_dict.keys():
+        #     if lang in incoming and lang != "english":
+        #         person.language = lang_dict[lang]
+        #         r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
 
-        # if "espanol" in incoming:
-        #     person.language = "es"
-        #     r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
-        # if "english" in incoming:
-        #     person.language = "en"
-        #     r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        if "espanol" in incoming:
+            person.language = "es"
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        if "english" in incoming:
+            person.language = "en"
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
         if "food" in incoming:
             if "remove food" in items:
                 removed.append("food")
