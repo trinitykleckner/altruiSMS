@@ -22,6 +22,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+import translators as ts
 
 @api_view(["GET", "POST"])
 @csrf_exempt
@@ -46,25 +47,34 @@ def sms(request):
 
     r = ""
     road_words = ['rd','road','st','street','ave','avenue','wy','way','cir','circle','ct','court','expy','expressway','fwy','freeway','ln','lane','pky','parkway','square','sq','tpk','turnpike']
+    lang_dict = {'english':'en','spanish':'es','french':'fr','chinese':'zh','arabic':'ar','russian':'ru','german':'de','italian':'it','japanese':'jp','korean':'ko'}
     #adding to and removing from the data base
     items = ["food", "diaper", "blanket", "sanitary"]
     removed = []
     added = []
     print(incoming)
     if new(to_number):
-        r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (To change language text \"language\")"
         person = Beneficiary.objects.create(phone_num=to_number)
         person.save()
     else:
         person = Beneficiary.objects.get(phone_num=to_number)
+        if person.language != 'en':
+            incoming = ts.google(incoming, to_language='en')
         if "help me" in incoming:
             r = help_menu()
         if "hi" or "hey" or "hello" in incoming:
-            r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (para mensajes en espanol, texto espanol)"
         if "items" in incoming:
             r += "Here are the items you can opt into (you can do so by replying with the names of the items you would like to be notified about):\n"+items[0]
             for item in items[1:]:
                 r += ", "+item
+        if "espanol" in incoming:
+            person.language = "es"
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        if "english" in incoming:
+            person.language = "en"
+            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
         if "food" in incoming:
             if "remove food" in items:
                 removed.append("food")
@@ -96,11 +106,11 @@ def sms(request):
 
         if len(added) > 0:
             s = list_to_string(added)
-            r += "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
+            r = "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
 
         if len(removed) > 0:
             s = list_to_string(removed)
-            r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
+            r = "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
         if ("remove" or "delete") and ("location" or "intersection") in incoming:
             person.latitude = 0.0
@@ -150,8 +160,8 @@ def sms(request):
 
     person.save()
 
-    if person.language != "english":
-        pass
+    if person.language != "en":
+        r = ts.google(r,from_language='en',to_language=person.language)
     client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
 
     message = client.messages \
@@ -398,6 +408,9 @@ def get_directions(slat, slon, dlat, dlon, mode="driving"):
     for j in jsn:
         dirs.append(j['maneuver']['instruction'])
     return '\n-'.join(dirs)
+
+def translate():
+    pass
 
 def help_menu():
     s = "-To change what items you are notified about you can just ask me to “remove” or “add” followed by an item name\n"
