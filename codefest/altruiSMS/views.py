@@ -100,14 +100,14 @@ def sms(request):
             s = list_to_string(removed)
             r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
-        if "address" in incoming:
-            print("here")
-            coords = (address_to_ll("12417 Borges Ave","MD"))
-            r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
+        # if "address" in incoming:
+        #     print("here")
+        #     coords = (address_to_ll("12417 Borges Ave","MD"))
+        #     r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
 
-        if "directions" in incoming:
-            get_directions("39.06057903899161","-77.00576469137488","40.00890629403572","-75.29311694445455")
-            r += "got them"
+        # if "directions" in incoming:
+        #     get_directions("39.06057903899161","-77.00576469137488","40.00890629403572","-75.29311694445455")
+        #     r += "got them"
 
         if "shelter" in incoming:
             if person.longitude == person.latitude == 0.0:
@@ -115,7 +115,11 @@ def sms(request):
             else:
                 closest = find_shelter(person.latitude,person.longitude)
                 address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.state+' '+closest.zipcode
-                r += 'The shelter closest to you is '+closest.organization_name+'Here is the adress:'+address+'\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
+                if "directions to shelter" in incoming:
+                    coords = address_to_ll(closest)
+                    r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
+                else:
+                    r += 'The shelter closest to you is '+closest.organization_name+'Here is the address:'+address+'For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
 
         elif "intersection" in incoming:
             found = False
@@ -296,13 +300,19 @@ def get_distance(lat1, lon1, lat2, lon2):
     lat, lon = abs(lat1 - lon1), abs(lon1 - lon2)
     return pow((pow(lat, 2) + pow(lon, 2)),.5)
 
-#using openrouteservice API
+#using mapbox directions API
 def get_directions(slat, slon, dlat, dlon):
-    starting_link = "https://api.openrouteservice.org/v2/directions/foot-walking?"
-    api_key = "5b3ce3597851110001cf6248bb9e7d6e9f7c48aea5f0e590ebbc1b5f"
-    req = requests.get(starting_link+"api_key="+api_key+"&start="+slat+","+slon+"&end="+dlat+","+dlon)
-    print(req.text)
-
+    mapbox_key = "&access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
+    base = "https://api.mapbox.com/directions/v5/mapbox/walking/"+slon+','+slat+';'+dlon+','+dlat+'?'
+    additions = "steps=true"
+    payload, headers = {}, {}
+    req = requests.request("GET",base+additions+mapbox_key,headers=headers, data=payload)
+    jsn = json.loads(req.text)
+    jsn = jsn['routes'][0]['legs'][0]['steps']
+    dirs = []
+    for j in jsn:
+        dirs.append(j['maneuver']['instruction'])
+    return '\n-'.join(dirs)
 
 
 def help_menu():
