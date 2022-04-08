@@ -164,8 +164,27 @@ class Index(LoginRequiredMixin, View):
     template = 'index.html'
     login_url = '/login/'
 
+
     def get(self, request):
-        return render(request, self.template, {'username':self.request.user})
+        today = datetime.datetime.today()
+        my_upcoming_event = Event.objects.all().filter(organization_name=self.request.user, start_datetime__gte=today).order_by('start_datetime').first()
+        upcoming_events = Event.objects.all().filter(start_datetime__gte=today).order_by('start_datetime')
+        upcoming_events_list = []
+        for event in upcoming_events:
+            event_list = []
+            event_list.append(event.event_name)
+            event_list.append(' '.join([event.address_one, event.address_two, event.city, event.zipcode]))
+            event_list.append(event.organization_name)
+            event_list.append(event.start_datetime.strftime("%Y-%m-%d %H:%M"))
+            event_list.append(event.end_datetime.strftime("%Y-%m-%d %H:%M"))
+            event_list.append(event.email)
+            upcoming_events_list.append(event_list)
+        if my_upcoming_event is not None:
+            upcoming_event_datetime = my_upcoming_event.start_datetime.strftime("%Y-%m-%d %H:%M")
+            return render(request, self.template, {'username':self.request.user, 'upcoming_event_datetime':upcoming_event_datetime, 'upcoming_events':upcoming_events_list})
+        else:
+            return render(request, self.template, {'username':self.request.user, 'upcoming_events':upcoming_events_list})
+
 
 class CreateEvent(LoginRequiredMixin, View):
     template = 'create_event.html'
@@ -180,6 +199,7 @@ class CreateEvent(LoginRequiredMixin, View):
             , event_name=request.POST['event_name'], event_description=request.POST['event_description']
             , organizer_lastname=request.POST['last_name'], email=request.POST['email'],  \
                 address_one=request.POST['address_one'], address_two=request.POST['address_two']\
+                    ,start_datetime=request.POST['event-starttime'], end_datetime=request.POST['event-endtime'] \
                     , city=request.POST['city'], zipcode=request.POST['zipcode'], food=change_on_to_true(request.POST.get('food', False)), \
                         diapers=change_on_to_true(request.POST.get('diapers', False)), \
                             sanitary=change_on_to_true(request.POST.get('sanitary', False))\
@@ -187,47 +207,47 @@ class CreateEvent(LoginRequiredMixin, View):
                                     )
         event.save()
 
-        client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
-        if event.food == True:
-            all_food = Beneficiary.objects.all().filter(food=True)
-            for ben in all_food:
-                message = client.messages \
-                    .create(
-                    body="Event notification: \n"+event.organization_name+" is having a food distribution event ( "+event.event_name+" )from"+str(event.start_datetime)+' to '+str(event.end_datetime)+'. The address is: '+event.address_one+" "+event.address_two+" "+event.city+" "+event.zipcode,
-                    from_='+18126055840',  # sams: '+15854407446',
-                    to= ben.phone_num
-                )
-            print(message.sid)
-            if event.diapers == True:
-                all_diapers = Beneficiary.objects.all().filter(diapers=True)
-                for ben in all_diapers:
-                    message = client.messages \
-                        .create(
-                        body="Event notification: \n" + event.organization_name + " is having a diaper distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
-                        from_ = '+18126055840',  # sams: '+15854407446',
-                        to = ben.phone_num
-                    )
-                    print(message.sid)
-            if event.sanitary == True:
-                all_sanitary = Beneficiary.objects.all().filter()(sanitary=True)
-                for ben in all_sanitary:
-                    message = client.messages \
-                        .create(
-                        body="Event notification: \n" + event.organization_name + " is having a sanitary products distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
-                        from_ = '+18126055840',
-                        to = ben.phone_num
-                    )
-                    print(message.sid)
-            if event.blankets == True:
-                all_blankets = Beneficiary.objects.all().filter(blankets=True)
-                for ben in all_blankets:
-                    message = client.messages \
-                        .create(
-                        body="Event notification: \n" + event.organization_name + " is having a blanket distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
-                        from_ = '+18126055840',  # sams: '+15854407446',
-                        to = ben.phone_num
-                    )
-                    print(message.sid)
+        # client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
+        # if event.food == True:
+        #     all_food = Beneficiary.objects.all().filter(food=True)
+        #     for ben in all_food:
+        #         message = client.messages \
+        #             .create(
+        #             body="Event notification: \n"+event.organization_name+" is having a food distribution event ( "+event.event_name+" )from"+str(event.start_datetime)+' to '+str(event.end_datetime)+'. The address is: '+event.address_one+" "+event.address_two+" "+event.city+" "+event.zipcode,
+        #             from_='+18126055840',  # sams: '+15854407446',
+        #             to= ben.phone_num
+        #         )
+        #     print(message.sid)
+        #     if event.diapers == True:
+        #         all_diapers = Beneficiary.objects.all().filter(diapers=True)
+        #         for ben in all_diapers:
+        #             message = client.messages \
+        #                 .create(
+        #                 body="Event notification: \n" + event.organization_name + " is having a diaper distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
+        #                 from_ = '+18126055840',  # sams: '+15854407446',
+        #                 to = ben.phone_num
+        #             )
+        #             print(message.sid)
+        #     if event.sanitary == True:
+        #         all_sanitary = Beneficiary.objects.all().filter()(sanitary=True)
+        #         for ben in all_sanitary:
+        #             message = client.messages \
+        #                 .create(
+        #                 body="Event notification: \n" + event.organization_name + " is having a sanitary products distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
+        #                 from_ = '+18126055840',
+        #                 to = ben.phone_num
+        #             )
+        #             print(message.sid)
+        #     if event.blankets == True:
+        #         all_blankets = Beneficiary.objects.all().filter(blankets=True)
+        #         for ben in all_blankets:
+        #             message = client.messages \
+        #                 .create(
+        #                 body="Event notification: \n" + event.organization_name + " is having a blanket distribution event ( " + event.event_name + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + event.address_one + " " + event.address_two + " " + event.city + " " + event.zipcode,
+        #                 from_ = '+18126055840',  # sams: '+15854407446',
+        #                 to = ben.phone_num
+        #             )
+        #             print(message.sid)
 
 
         return HttpResponseRedirect('/')
