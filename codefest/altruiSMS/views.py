@@ -168,7 +168,9 @@ class CreateEvent(LoginRequiredMixin, View):
                             sanitary=change_on_to_true(request.POST.get('sanitary', False))\
                                 , blankets=change_on_to_true(request.POST.get('blankets', False))\
                                     )
-        event.save()        
+        event.save()  
+
+
         return HttpResponseRedirect('/')
 
 class Register(View):
