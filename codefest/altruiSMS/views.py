@@ -36,10 +36,6 @@ def sms(request):
 
     response = requests.request("GET", url).json()
 
-    #making a beneficiary
-    person = Beneficiary(phone_num = to_number)
-    person.save()
-
     #converting incoming to no special chars
     incoming = ''
     for c in incoming_og:
@@ -57,9 +53,16 @@ def sms(request):
     print(incoming)
     if new(to_number):
         r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+        person = Beneficiary.objects.create(phone_num=to_number)
+        person.save()
     else:
+        person = Beneficiary.objects.get(phone_num=to_number)
         if "help me" in incoming:
             r = help_menu()
+        if "items" in incoming:
+            r += "Here are the items you can opt into (you can do so by replying with the names of the items you would like to be notified about):\n"+items[0]
+            for item in items[1:]:
+                r += ", "+item
         if "food" in incoming:
             if "remove food" in items:
                 removed.append("food")
@@ -97,10 +100,14 @@ def sms(request):
             s = list_to_string(removed)
             r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
-        if "address" in incoming:
-            print("here")
-            coords = (address_to_ll("12417 Borges Ave","MD"))
-            r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
+        # if "address" in incoming:
+        #     print("here")
+        #     coords = (address_to_ll("12417 Borges Ave","MD"))
+        #     r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
+
+        # if "directions" in incoming:
+        #     get_directions("39.06057903899161","-77.00576469137488","40.00890629403572","-75.29311694445455")
+        #     r += "got them"
 
         if "shelter" in incoming:
             if person.longitude == person.latitude == 0.0:
@@ -108,22 +115,25 @@ def sms(request):
             else:
                 closest = find_shelter(person.latitude,person.longitude)
                 address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.state+' '+closest.zipcode
-                r += 'The shelter closest to you is '+closest.organization_name+'Here is the adress:'+address+'\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
+                if "directions to shelter" in incoming:
+                    coords = address_to_ll(closest)
+                    r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
+                else:
+                    r += 'The shelter closest to you is '+closest.organization_name+'Here is the address:'+address+'For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
 
         elif "intersection" in incoming:
+            found = False
             split = incoming.split()[1:]
             for word in split:
-                if word in road_words:
+                if word in road_words and word != "and":
                     road1 = ' '.join(split[:split.index(word) + 1])
                     road2 = ' '.join(split[split.index(word) + 1:])
                     set_location(person, road1, road2)
+                    r += "Thanks!! You will now be notified when there is a distribution near you.\n"
                     r += "Coords: ["+str(person.latitude)+','+str(person.longitude)+']'
                     found = True
                     break
-            if found:
-                #r += "Thanks!! You will now be notified when there is a distribution near you."
-                pass
-            else:
+            if not found:
                 r += 'Hm, I could not find that intersection, could you try entering another one (make sure to include the word "intersection" before the street names)'
 
         if r == "":
@@ -291,6 +301,20 @@ def find_shelter(lat, lon):
 def get_distance(lat1, lon1, lat2, lon2):
     lat, lon = abs(lat1 - lon1), abs(lon1 - lon2)
     return pow((pow(lat, 2) + pow(lon, 2)),.5)
+
+#using mapbox directions API
+def get_directions(slat, slon, dlat, dlon):
+    mapbox_key = "&access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
+    base = "https://api.mapbox.com/directions/v5/mapbox/walking/"+slon+','+slat+';'+dlon+','+dlat+'?'
+    additions = "steps=true"
+    payload, headers = {}, {}
+    req = requests.request("GET",base+additions+mapbox_key,headers=headers, data=payload)
+    jsn = json.loads(req.text)
+    jsn = jsn['routes'][0]['legs'][0]['steps']
+    dirs = []
+    for j in jsn:
+        dirs.append(j['maneuver']['instruction'])
+    return '\n-'.join(dirs)
 
 
 def help_menu():
