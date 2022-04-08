@@ -121,7 +121,7 @@ def sms(request):
                     coords = address_to_ll(closest)
                     r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
                 else:
-                    r += 'The shelter closest to you is '+closest.organization_name+' Here is the address: '+address+' For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
+                    r += 'The shelter closest to you is '+closest.organization_name+' Here is the address: '+address+' For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explanation.'
 
         elif "intersection" in incoming:
             found = False
@@ -328,7 +328,6 @@ def find_shelter(lat, lon):
     closest = None
     shortest_distance = None
     for shelter in all_stayable:
-        print(shelter)
         if closest == None:
             closest = shelter
             coords = address_to_ll(shelter)
@@ -336,11 +335,9 @@ def find_shelter(lat, lon):
             if coords == False:
                 return False
             shortest_distance = get_distance(coords[0], coords[1], lat, lon)
-            print(shelter,shortest_distance)
         else:
             coords = address_to_ll(shelter)
             dist = get_distance(coords[0],coords[1], lat, lon)
-            print(shelter,dist)
             if dist < shortest_distance:
                 closest = shelter
                 shortest_distance = dist
@@ -358,11 +355,10 @@ def get_distance(lat1, lon1, lat2, lon2):
     jsn = json.loads(req.text)
     return jsn['routes'][0]['distance']
 
-
 #using mapbox directions API
 def get_directions(slat, slon, dlat, dlon, mode="driving"):
     mapbox_key = "&access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
-    base = "https://api.mapbox.com/directions/v5/mapbox/"+mode+"/"+slon+','+slat+';'+dlon+','+dlat+'?'
+    base = "https://api.mapbox.com/directions/v5/mapbox/"+mode+"/"+str(slon)+','+str(slat)+';'+str(dlon)+','+str(dlat)+'?'
     additions = "steps=true"
     payload, headers = {}, {}
     req = requests.request("GET",base+additions+mapbox_key,headers=headers, data=payload)
