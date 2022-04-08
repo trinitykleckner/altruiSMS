@@ -113,7 +113,7 @@ def sms(request):
 
         if len(added) > 0:
             s = list_to_string(added)
-            r = "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
+            r = "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “intersection” followed by names of two intersecting streets near you\n"
 
         if len(removed) > 0:
             s = list_to_string(removed)
@@ -155,7 +155,7 @@ def sms(request):
                     road1 = ' '.join(split[:split.index(word) + 1])
                     road2 = ' '.join(split[split.index(word) + 1:])
                     set_location(person, road1, road2)
-                    r += "Thanks!! You will now be notified when there is a distribution near you.\n"
+                    r += "Got it! Thanks!.\n"
                     #r += "Coords: ["+str(person.latitude)+','+str(person.longitude)+']'
                     found = True
                     break
@@ -325,7 +325,7 @@ class Login(View):
 
 #returns true if num not in which phone list
 def new(num):
-    if Beneficiary.objects.exists():
+    if Beneficiary.objects.filter(phone_num=num).exists():
         return False
     else:
         return True

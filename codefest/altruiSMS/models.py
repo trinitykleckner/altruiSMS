@@ -15,7 +15,7 @@ class Beneficiary(models.Model):
     blankets = models.BooleanField(default=False)
     longitude = models.FloatField(null=True, default=0.0)
     latitude = models.FloatField(null=True, default=0.0)
-    language = models.CharField(default="english", max_length=15)
+    language = models.CharField(default="en", max_length=15)
 
     def __str__(self):
         return str(self.phone_num)
