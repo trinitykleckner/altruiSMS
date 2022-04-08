@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+https://altruisms.herokuapp.com/
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-06-2#u^s2tn=o8wwe(+^k*&t0n@nsdto_(%gbmgpakht9fsr7%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['3957-165-82-220-12.ngrok.io', '127.0.0.1','0.0.0.0', 'localhost']
+ALLOWED_HOSTS = ['3957-165-82-220-12.ngrok.io', '127.0.0.1','0.0.0.0', 'localhost', 'altruisms.herokuapp.com']
 
 
 # Application definition
