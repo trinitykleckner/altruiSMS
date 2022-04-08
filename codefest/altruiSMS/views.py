@@ -116,12 +116,12 @@ def sms(request):
                 r = 'To find a shelter for you I need some idea of your location first. Send a message saying "intersection" and the name of two streets that intersect near you. After doing this, text shelter again, and I can find the one closest to you'
             else:
                 closest = find_shelter(person.latitude,person.longitude)
-                address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.state+' '+closest.zipcode
+                address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.zipcode
                 if "directions to shelter" in incoming:
                     coords = address_to_ll(closest)
                     r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
                 else:
-                    r += 'The shelter closest to you is '+closest.organization_name+'Here is the address:'+address+'For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
+                    r += 'The shelter closest to you is '+closest.organization_name+' Here is the address: '+address+' For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explination.'
 
         elif "intersection" in incoming:
             found = False
@@ -315,36 +315,49 @@ def set_location(person, road1, road2):
         return False
 
 def address_to_ll(shelter):
-    req = requests.get('https://www.google.com/maps/place/' + shelter.address_one + ' '+ shelter.state)
-    coords = re.search(r'\[null,null,[+-]?([0-9]+\.[0-9]{10,}),[+-]?([0-9]+\.[0-9]+|\.[0-9]+)]',req.text)
-    if coords is not None:
-        return [float(coords[0].split(',')[2]),float(coords[0].split(',')[3][:-1])]
-    else:
-        return False
+    mapbox_key = "access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
+    base = "https://api.mapbox.com/geocoding/v5/mapbox.places/"+shelter.address_one+"+"+shelter.city+".json?"
+    payload, headers = {}, {}
+    req = requests.request("GET", base + mapbox_key, headers=headers, data=payload)
+    jsn = json.loads(req.text)
+    jsn = jsn['features'][0]['geometry']['coordinates']
+    return [float(jsn[1]), float(jsn[0])]
 
 def find_shelter(lat, lon):
-    all_stayable = Organization.objects.all(stayable=True)
+    all_stayable = Organization.objects.all().filter(stayable=True)
     closest = None
     shortest_distance = None
     for shelter in all_stayable:
+        print(shelter)
         if closest == None:
             closest = shelter
             coords = address_to_ll(shelter)
+            #print("coors = "+coords)
             if coords == False:
                 return False
-            dist = get_distance(coords[0],coords[1], lat, lon)
-            shortest_distance = dist
+            shortest_distance = get_distance(coords[0], coords[1], lat, lon)
+            print(shelter,shortest_distance)
         else:
             coords = address_to_ll(shelter)
             dist = get_distance(coords[0],coords[1], lat, lon)
+            print(shelter,dist)
             if dist < shortest_distance:
                 closest = shelter
                 shortest_distance = dist
     return closest
 
-def get_distance(lat1, lon1, lat2, lon2):
+def get_distance2(lat1, lon1, lat2, lon2):
     lat, lon = abs(lat1 - lon1), abs(lon1 - lon2)
     return pow((pow(lat, 2) + pow(lon, 2)),.5)
+
+def get_distance(lat1, lon1, lat2, lon2):
+    mapbox_key = "access_token=pk.eyJ1IjoidHJpbmlyYWU5MjgiLCJhIjoiY2wxcHYyZjRmMDFqcjNqcXE2Mmd2NXh3eSJ9.7_9DKf4E3PFM0oVNr2KkcA"
+    base = "https://api.mapbox.com/directions/v5/mapbox/driving/" + str(lon1) + ',' + str(lat1) + ';' + str(lon2) + ',' + str(lat2) + '?'
+    payload, headers = {}, {}
+    req = requests.request("GET",base+mapbox_key,headers=headers, data=payload)
+    jsn = json.loads(req.text)
+    return jsn['routes'][0]['distance']
+
 
 #using mapbox directions API
 def get_directions(slat, slon, dlat, dlon, mode="driving"):
@@ -359,7 +372,6 @@ def get_directions(slat, slon, dlat, dlon, mode="driving"):
     for j in jsn:
         dirs.append(j['maneuver']['instruction'])
     return '\n-'.join(dirs)
-
 
 def help_menu():
     s = "-To change what items you are notified about you can just ask me to “remove” or “add” followed by an item name\n"
