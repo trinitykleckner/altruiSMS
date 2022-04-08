@@ -9,7 +9,7 @@ var myLineChart = new Chart(ctx, {
   data: {
     labels: ["November", "December", "January", "February", "March", "April"],
     datasets: [{
-      label: "outreach_num",
+      label: "Number",
       backgroundColor: "rgba(2,117,216,1)",
       borderColor: "rgba(2,117,216,1)",
       data: [421, 531, 625, 781, 981, 1484],
