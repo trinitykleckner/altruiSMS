@@ -100,6 +100,11 @@ def sms(request):
             s = list_to_string(removed)
             r += "Sounds good, I will no longer notify you about avalible " +s+ "\n"
 
+        if ("remove" or "delete") and ("location" or "intersection") in incoming:
+            person.latitude = 0.0
+            person.longitude = 0.0
+            r += "Your location has been deleted"
+
         # if "address" in incoming:
         #     print("here")
         #     coords = (address_to_ll("12417 Borges Ave","MD"))
@@ -375,6 +380,7 @@ def help_menu():
     s += '-To change your location, text “change location to” followed by the new zip code or intersection (names of two streets)\n'
     s += '-To find the nearest shelter to you, text “shelter” followed by a intersection you are looking for a shelter near. If you have already given us a location, you can just text “shelter”\n'
     s += '-To get directions to your nearest shelter type text "directions to shelter" you can get walking directions by adding "walking"'
+    s += '-You can delete your location information with a text saying "delete location"'
     return s
 
 def change_on_to_true(data):
