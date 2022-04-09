@@ -235,7 +235,7 @@ class CreateEvent(LoginRequiredMixin, View):
             for ben in all_food:
                 message = client.messages \
                     .create(
-                    body= "Event notification: \n"+str(event.organization_name)+" is having a food distribution event ( "+str(event.event_name)+" )from"+str(event.start_datetime)+' to '+str(event.end_datetime)+'. The address is: '+str(event.address_one)+" "+str(event.address_two)+" "+str(event.city)+" "+str(event.zipcode)+"\n Heres a description of the event: "+str(event.event_description),
+                    body= "Event notification: \n"+str(event.organization_name)+" is having a food distribution event ("+str(event.event_name)+") from "+str(event.start_datetime)+' to '+str(event.end_datetime)+'. The address is: '+str(event.address_one)+" "+str(event.address_two)+" "+str(event.city)+" "+str(event.zipcode)+"\n Here is a description of the event: "+str(event.event_description),
                     from_='+18126055840',  # sams: '+15854407446',
                     to= ben.phone_num
                 )
@@ -245,7 +245,7 @@ class CreateEvent(LoginRequiredMixin, View):
             for ben in all_diapers:
                 message = client.messages \
                     .create(
-                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event ( " + str(event.event_name) + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Heres a description of the event: "+str(event.event_description),
+                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event (" + str(event.event_name) + ") from " + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Here is a description of the event: "+str(event.event_description),
                     from_ = '+18126055840',  # sams: '+15854407446',
                     to = ben.phone_num
                 )
@@ -255,7 +255,7 @@ class CreateEvent(LoginRequiredMixin, View):
             for ben in all_sanitary:
                 message = client.messages \
                     .create(
-                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event ( " + str(event.event_name) + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Heres a description of the event: "+str(event.event_description),
+                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event (" + str(event.event_name) + ") from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Here is a description of the event: "+str(event.event_description),
                     from_ = '+18126055840',
                     to = ben.phone_num
                 )
@@ -265,7 +265,7 @@ class CreateEvent(LoginRequiredMixin, View):
             for ben in all_blankets:
                 message = client.messages \
                     .create(
-                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event ( " + str(event.event_name) + " )from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Heres a description of the event: "+str(event.event_description),
+                    body="Event notification: \n" + str(event.organization_name) + " is having a diaper distribution event (" + str(event.event_name) + ") from" + str(event.start_datetime) + ' to ' + str(event.end_datetime) + '. The address is: ' + str(event.address_one) + " " + str(event.address_two) + " " + (event.city) + " " + (event.zipcode)+"\n Here is a description of the event: "+str(event.event_description),
                     from_ = '+18126055840',  # sams: '+15854407446',
                     to = ben.phone_num
                 )
