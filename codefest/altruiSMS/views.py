@@ -54,7 +54,7 @@ def sms(request):
     added = []
     print(incoming)
     if new(to_number):
-        r = "Hi! I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (para mensajes en espanol, texto \"espanol\")" #(for a different language type \"language\")"
+        r = "Hi! I’m Phil, AlturiSMS' chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (para mensajes en espanol, texto \"espanol\")" #(for a different language type \"language\")"
         person = Beneficiary.objects.create(phone_num=to_number)
         person.save()
     else:
@@ -64,7 +64,9 @@ def sms(request):
         if "help me" in incoming:
             r = help_menu()
         if "hi" == incoming or "hey" == incoming or "hello" == incoming:
-            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+            r = "Hi! I’m Phil, AlturiSMS' chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future. (para mensajes en espanol, texto \"espanol\")"  # (for a different language type \"language\")"
+        if "thank you" == incoming:
+            r = "Youre welcome!"
         if "items" in incoming:
             r += "Here are the items you can opt into (you can do so by replying with the names of the items you would like to be notified about):\n"+items[0]
             for item in items[1:]:
@@ -78,10 +80,10 @@ def sms(request):
 
         if "espanol" in incoming:
             person.language = "es"
-            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+            r = "Hi!  I’m Phil, UlturiSMS' chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
         if "english" in incoming:
             person.language = "en"
-            r = "Hi!  I’m chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
+            r = "Hi!  I’m phil AlturiSMS' chatbot, I am here to help you get access to the resources you need. By responding to this text you can opt into receiving notifications as local organizations are holding drives, or giving away specific items. The items you can choose to be notified about are food, diapers, blankets, and sanitary items. Reply to this text with the names of the items you wish to be notified about in the future."
         if "food" in incoming:
             if "remove food" in items:
                 removed.append("food")
@@ -113,7 +115,7 @@ def sms(request):
 
         if len(added) > 0:
             s = list_to_string(added)
-            r = "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “zip” followed by a zip code near you or the word “intersection” followed by names of two intersecting streets near you\n"
+            r = "Sounds good! To make sure we are notifying you about distributions of "+s+" in your area please reply to this text with either the word “intersection” followed by names of two intersecting streets near you\n"
 
         if len(removed) > 0:
             s = list_to_string(removed)
@@ -129,11 +131,11 @@ def sms(request):
         #     coords = (address_to_ll("12417 Borges Ave","MD"))
         #     r += "Coords: ["+str(coords[0])+','+str(coords[1])+']'
 
-        if "directions" in incoming:
-            if "walking" in incoming:
-                r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455", mode="walking")
-            else:
-                r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455")
+        # if "directions" in incoming:
+        #     if "walking" in incoming:
+        #         r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455", mode="walking")
+        #     else:
+        #         r += get_directions(str(person.latitude), str(person.longitude), "40.00890629403572","-75.29311694445455")
 
         if "shelter" in incoming:
             if person.longitude == person.latitude == 0.0:
@@ -143,7 +145,10 @@ def sms(request):
                 address = closest.address_one+', '+closest.address_two+', '+closest.city+' '+closest.zipcode
                 if "directions to shelter" in incoming:
                     coords = address_to_ll(closest)
-                    r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
+                    if "walk" in incoming:
+                        r += "Here are your directions: \n" + get_directions(person.latitude, person.longitude,coords[0], coords[1],mode="walking")
+                    else:
+                        r += "Here are your directions: \n"+get_directions(person.latitude, person.longitude,coords[0],coords[1])
                 else:
                     r += 'The shelter closest to you is '+closest.organization_name+' Here is the address: '+address+' For directions to this shelter just text me "directions to shelter."\n Make sure we have your most recent location in order to provide you with the actual nearest shelter. If your not sure how to do this, text "help me" for an explanation.'
 
@@ -155,7 +160,7 @@ def sms(request):
                     road1 = ' '.join(split[:split.index(word) + 1])
                     road2 = ' '.join(split[split.index(word) + 1:])
                     set_location(person, road1, road2)
-                    r += "Thanks!! You will now be notified when there is a distribution near you.\n"
+                    r += "Got it! Thanks!.\n"
                     #r += "Coords: ["+str(person.latitude)+','+str(person.longitude)+']'
                     found = True
                     break
@@ -325,7 +330,7 @@ class Login(View):
 
 #returns true if num not in which phone list
 def new(num):
-    if Beneficiary.objects.exists():
+    if Beneficiary.objects.filter(phone_num=num).exists():
         return False
     else:
         return True
