@@ -174,7 +174,7 @@ def sms(request):
 
     if person.language != "en":
         r = ts.google(r,from_language='en',to_language=person.language)
-    client = Client("AC86f5c09c4f505b9a005468ffcf760039", "3c47e7ec29619f8f27c6a11115a5d433")
+    client = Client("", "")
 
     message = client.messages \
         .create(
