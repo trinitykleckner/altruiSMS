@@ -1,5 +1,7 @@
 # AltruiSMS 
 
+### Won best hack for social good at Drexel University's Philly Codefest in 2022
+
 ## Elevator Pitch
 We present Phil, an SMS chat bot to notify the homeless and hungry of shelters and welfare distribution anywhere, at any time.
 
