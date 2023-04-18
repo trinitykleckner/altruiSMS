@@ -3,7 +3,7 @@
 ## Elevator Pitch
 We present Phil, an SMS chat bot to notify the homeless and hungry of shelters and welfare distribution anywhere, at any time.
 
-See demo [here](https://youtu.be/Za9T4aq0ilw)
+## See demo [here](https://youtu.be/Za9T4aq0ilw)
 
 ## Inspiration
 In Philadelphia, many homeless and hungry people do not have stable internet access. Hence, it is difficult for them to reliably communicate with them about where the distribution of food and daily necessities are taking place. Hence, we want to create a SMS chat bot that connects the homeless and hungry with voluntary welfare organizations and churches.
